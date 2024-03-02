@@ -2,6 +2,7 @@ package services
 
 import (
 	"app/internal/models"
+	"encoding/json"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"gorm.io/gorm"
@@ -22,10 +23,25 @@ const (
 type AuthService struct {
 	db     *gorm.DB
 	logger *log.Logger
+	config Config
 }
 
-func NewAuthService() *AuthService {
-	return &AuthService{}
+type Config struct {
+	SmtpServer   string `json:"smtp_server"`
+	SmtpPort     int    `json:"smtp_port"`
+	SmtpUsername string `json:"smtp_username"`
+	SmtpPassword string `json:"smtp_password"`
+}
+
+// NewAuthService 创建一个新的身份验证服务实例
+func NewAuthService(db *gorm.DB, logger *log.Logger) (*AuthService, error) {
+	// 加载配置文件
+	config, err := LoadConfig("config.json")
+	if err != nil {
+		return nil, err
+	}
+
+	return &AuthService{db: db, logger: logger, config: config}, nil
 }
 
 // 生成随机验证码
@@ -37,7 +53,6 @@ func generateVerificationCode() string {
 	}
 	return code
 }
-
 func (s *AuthService) Register(email, username, password, confirmPassword string) error {
 	// 检查密码和确认密码是否匹配
 	if password != confirmPassword {
@@ -107,7 +122,7 @@ func (s *AuthService) ForgotPassword(email string) error {
 	}
 
 	// 发送包含验证码的邮件给用户
-	err := sendVerificationEmail(email, verificationCode)
+	err := s.sendVerificationEmail(email, verificationCode) // 修改此处调用
 	if err != nil {
 		return err
 	}
@@ -166,19 +181,24 @@ func generateToken(userID uint) (string, error) {
 	return signedToken, nil
 }
 
-func sendVerificationEmail(email, code string) error {
-	// 从环境变量中读取 SMTP 服务器地址和端口
-	smtpServer := os.Getenv("SMTP_SERVER")
-	smtpPortStr := os.Getenv("SMTP_PORT")
-	smtpPort, err := strconv.Atoi(smtpPortStr)
+func LoadConfig(filename string) (Config, error) {
+	var config Config
+	file, err := os.Open(filename)
 	if err != nil {
-		return err
+		return config, err
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&config)
+	if err != nil {
+		return config, err
 	}
 
-	// 从环境变量中读取发件人邮箱和密码
-	senderEmail := os.Getenv("SENDER_EMAIL")
-	senderPassword := os.Getenv("SENDER_PASSWORD")
+	return config, nil
+}
 
+func (s *AuthService) sendVerificationEmail(email, code string) error { // 新增函数
 	// 设置收件人邮箱
 	to := []string{email}
 
@@ -191,8 +211,8 @@ func sendVerificationEmail(email, code string) error {
 		"\r\n" + body + "\r\n")
 
 	// 连接到 SMTP 服务器
-	auth := smtp.PlainAuth("", senderEmail, senderPassword, smtpServer)
-	err = smtp.SendMail(smtpServer+":"+strconv.Itoa(smtpPort), auth, senderEmail, to, message)
+	auth := smtp.PlainAuth("", s.config.SmtpUsername, s.config.SmtpPassword, s.config.SmtpServer)
+	err := smtp.SendMail(s.config.SmtpServer+":"+strconv.Itoa(s.config.SmtpPort), auth, s.config.SmtpUsername, to, message)
 	if err != nil {
 		return err
 	}

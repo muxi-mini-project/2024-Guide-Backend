@@ -9,10 +9,10 @@ type TeamService struct {
 	db *gorm.DB
 }
 
-func NewTeamService() *TeamService {
-	return &TeamService{}
+// NewTeamService 创建一个新的团队服务实例
+func NewTeamService(db *gorm.DB) *TeamService {
+	return &TeamService{db: db}
 }
-
 func (s *TeamService) CreateTeam(name, invitation string) error {
 	team := &models.Team{
 		Name:       name,

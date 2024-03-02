@@ -12,12 +12,11 @@ type TaskHandler struct {
 	taskService *services.TaskService
 }
 
-func NewTaskHandler() *TaskHandler {
+func NewTaskHandler(taskService *services.TaskService) *TaskHandler {
 	return &TaskHandler{
-		taskService: services.NewTaskService(),
+		taskService: taskService,
 	}
 }
-
 func (h *TaskHandler) CreateTask(c *gin.Context) {
 	// 从请求中获取表单数据
 	var createTaskRequest struct {
@@ -216,8 +215,16 @@ func (h *TaskHandler) CompleteTeamTask(c *gin.Context) {
 		return
 	}
 
+	// 从请求中获取团队任务级别
+	levelStr := c.Query("level")
+	level, err := strconv.Atoi(levelStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid level"})
+		return
+	}
+
 	// 调用团队任务服务完成团队任务
-	if err := h.taskService.CompleteTeamTask(uint(taskID)); err != nil {
+	if err := h.taskService.CompleteTeamTask(uint(taskID), level); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

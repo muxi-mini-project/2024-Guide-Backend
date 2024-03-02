@@ -5,35 +5,28 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(router *gin.Engine) {
-	authHandler := handlers.NewAuthHandler()
-
-	// 用户认证相关路由
+func SetupRoutes(router *gin.Engine, authService *handlers.AuthHandler, taskService *handlers.TaskHandler, teamService *handlers.TeamHandler) {
 	authRoutes := router.Group("/auth")
 	{
-		authRoutes.POST("/register", authHandler.Register)
-		authRoutes.POST("/login", authHandler.Login)
-		authRoutes.POST("/forgot-password", authHandler.ForgotPassword)
-		authRoutes.POST("/reset-password", authHandler.ResetPassword)
+		authRoutes.POST("/register", authService.Register)
+		authRoutes.POST("/login", authService.Login)
+		authRoutes.POST("/forgot-password", authService.ForgotPassword)
+		authRoutes.POST("/reset-password", authService.ResetPassword)
 	}
 
-	// 任务相关路由
-	taskRoutes := router.Group("/task")
+	taskRoutes := router.Group("/tasks")
 	{
-		taskRoutes.POST("/create", taskHandler.CreateTask)
-		taskRoutes.DELETE("/delete/:id", taskHandler.DeleteTask)
-		taskRoutes.PUT("/update/:id", taskHandler.UpdateTask)
-		// 其他任务相关路由...
+		taskRoutes.POST("/create-task", taskService.CreateTask)
+		taskRoutes.DELETE("/delete-task/:id", taskService.DeleteTask)
+		taskRoutes.PUT("/update-task/:id", taskService.UpdateTask)
+		taskRoutes.PUT("/mark-task-as-completed/:id", taskService.MarkTaskAsCompleted)
 	}
 
-	// 团队相关路由
-	teamRoutes := router.Group("/team")
+	teamRoutes := router.Group("/teams")
 	{
-		teamRoutes.POST("/create", teamHandler.CreateTeam)
-		teamRoutes.POST("/join", teamHandler.JoinTeam)
-		teamRoutes.GET("/members/:id", teamHandler.GetTeamMembers)
-		// 其他团队相关路由...
+		teamRoutes.POST("/create-team", teamService.CreateTeam)
+		teamRoutes.POST("/join-team", teamService.JoinTeam)
+		teamRoutes.GET("/team-members/:id", teamService.GetTeamMembers)
+		teamRoutes.POST("/add-comment", teamService.AddComment)
 	}
-
-	// 其他路由...
 }

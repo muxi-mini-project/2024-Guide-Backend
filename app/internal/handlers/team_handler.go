@@ -11,9 +11,9 @@ type TeamHandler struct {
 	teamService *services.TeamService
 }
 
-func NewTeamHandler() *TeamHandler {
+func NewTeamHandler(teamService *services.TeamService) *TeamHandler {
 	return &TeamHandler{
-		teamService: services.NewTeamService(),
+		teamService: teamService,
 	}
 }
 
