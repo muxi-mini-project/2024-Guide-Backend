@@ -1,0 +1,471 @@
+openapi: 3.0.0
+info:
+  title: 引路人
+  description: api
+  version: 1.0.0
+servers:
+  - url: http://150.158.114.182:8080
+    description: Production server
+
+/auth:
+paths:
+  /auth/send_verification_email:
+    post:
+      summary: Send verification email
+      description: Sends a verification email to the specified email address.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Email address to send the verification code to
+                code:
+                  type: string
+                  description: Verification code to be sent in the email
+      responses:
+        '200':
+          description: Verification email sent successfully
+        '400':
+          description: Bad request. Invalid email address or verification code.
+        '500':
+          description: Internal server error. Failed to send verification email.
+/register:
+  post:
+    summary: "User Registration"
+    description: "Functionality for user registration to create a new user"
+    parameters:
+      - name: body
+        in: body
+        description: "Registration information"
+        required: true
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              description: "User email"
+            username:
+              type: string
+              description: "Username"
+            password:
+              type: string
+              description: "Password"
+            confirmPassword:
+              type: string
+              description: "Confirm Password"
+            code:
+              type: string
+              description: "Email verification code"
+    responses:
+      200:
+        description: "Successful registration"
+      400:
+        description: "Bad request parameters"
+      500:
+        description: "Internal server error"
+
+/login:
+  post:
+    summary: "User Login"
+    description: "Functionality for user login for authentication"
+    parameters:
+      - name: body
+        in: body
+        description: "Login information"
+        required: true
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              description: "User email"
+            password:
+              type: string
+              description: "Password"
+    responses:
+      200:
+        description: "Successful login, returning JWT Token"
+        schema:
+          type: object
+          properties:
+            token:
+              type: string
+              description: "JWT Token"
+      400:
+        description: "Bad request parameters"
+      401:
+        description: "Unauthorized, incorrect email or password"
+      500:
+        description: "Internal server error"
+
+/forgot-password:
+  post:
+    summary: "Forgot Password"
+    description: "Functionality for user forgot password, sending reset password link to registered email"
+    parameters:
+      - name: body
+        in: body
+        description: "Email information"
+        required: true
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              description: "User email"
+    responses:
+      200:
+        description: "Reset password link sent successfully"
+      400:
+        description: "Bad request parameters"
+      404:
+        description: "User email not found"
+      500:
+        description: "Internal server error"
+
+/reset-password:
+  post:
+    summary: "Reset Password"
+    description: "Functionality for resetting user password"
+    parameters:
+      - name: body
+        in: body
+        description: "Reset password information"
+        required: true
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              description: "User email"
+            newPassword:
+              type: string
+              description: "New password"
+            confirmPassword:
+              type: string
+              description: "Confirm password"
+            code:
+              type: string
+              description: "Email verification code"
+    responses:
+      200:
+        description: "Password reset successful"
+      400:
+        description: "Bad request parameters"
+      404:
+        description: "User email not found"
+      500:
+        description: "Internal server error"
+
+  /tasks:
+    post:
+      summary: Create a new task
+      tags:
+        - Tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userID:
+                  type: integer
+                title:
+                  type: string
+                description:
+                  type: string
+                points:
+                  type: integer
+      responses:
+        '200':
+          description: Task created successfully
+
+  /tasks/{taskID}:
+    delete:
+      summary: Delete a task
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: taskID
+          schema:
+            type: integer
+          required: true
+          description: ID of the task to delete
+      responses:
+        '200':
+          description: Task deleted successfully
+
+    put:
+      summary: Update a task
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: taskID
+          schema:
+            type: integer
+          required: true
+          description: ID of the task to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                points:
+                  type: integer
+                completed:
+                  type: boolean
+      responses:
+        '200':
+          description: Task updated successfully
+
+  /tasks/personal/{userID}:
+    get:
+      summary: Get personal tasks for a user
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: userID
+          schema:
+            type: integer
+          required: true
+          description: ID of the user
+      responses:
+        '200':
+          description: Personal tasks retrieved successfully
+
+  /tasks/team/{teamID}:
+    get:
+      summary: Get team tasks for a team
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: teamID
+          schema:
+            type: integer
+          required: true
+          description: ID of the team
+      responses:
+        '200':
+          description: Team tasks retrieved successfully
+
+  /tasks/adventure/random:
+    get:
+      summary: Get a random adventure task
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: Random adventure task retrieved successfully
+
+  /tasks/combination:
+    post:
+      summary: Create a combination task
+      tags:
+        - Tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userID:
+                  type: integer
+                title:
+                  type: string
+                description:
+                  type: string
+                subTasks:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                      description:
+                        type: string
+                      points:
+                        type: integer
+                      completed:
+                        type: boolean
+      responses:
+        '200':
+          description: Combination task created successfully
+
+  /tasks/completed/{taskID}:
+    put:
+      summary: Mark a task as completed
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: taskID
+          schema:
+            type: integer
+          required: true
+          description: ID of the task to mark as completed
+      responses:
+        '200':
+          description: Task marked as completed successfully
+
+  /tasks/completed:
+    delete:
+      summary: Delete completed tasks
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: Completed tasks deleted successfully
+
+  /tasks/team/{taskID}/complete/{level}:
+    put:
+      summary: Complete a team task and distribute experience points
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: taskID
+          schema:
+            type: integer
+          required: true
+          description: ID of the task to complete
+        - in: path
+          name: level
+          schema:
+            type: integer
+          required: true
+          description: Level of the task completion
+      responses:
+        '200':
+          description: Team task completed successfully
+  /teams:
+    post:
+      summary: Create a new team
+      tags:
+        - Teams
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                invitation:
+                  type: string
+      responses:
+        '200':
+          description: Team created successfully
+
+  /teams/join:
+    post:
+      summary: Join a team
+      tags:
+        - Teams
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                invitation:
+                  type: string
+                userID:
+                  type: integer
+                position:
+                  type: string
+      responses:
+        '200':
+          description: User joined team successfully
+
+  /teams/members/{teamID}:
+    get:
+      summary: Get team members
+      tags:
+        - Teams
+      parameters:
+        - in: path
+          name: teamID
+          schema:
+            type: integer
+          required: true
+          description: ID of the team
+      responses:
+        '200':
+          description: Team members retrieved successfully
+
+  /teams/user/{userID}:
+    get:
+      summary: Get teams for a user
+      tags:
+        - Teams
+      parameters:
+        - in: path
+          name: userID
+          schema:
+            type: integer
+          required: true
+          description: ID of the user
+      responses:
+        '200':
+          description: User's teams retrieved successfully
+
+  /teams/comments:
+    post:
+      summary: Add comment to a team member
+      tags:
+        - Teams
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                memberID:
+                  type: integer
+                commentedUserID:
+                  type: integer
+                comment:
+                  type: string
+      responses:
+        '200':
+          description: Comment added successfully
+
+  /teams/comments/{memberID}:
+    get:
+      summary: Get comments for a team member
+      tags:
+        - Teams
+      parameters:
+        - in: path
+          name: memberID
+          schema:
+            type: integer
+          required: true
+          description: ID of the team member
+      responses:
+        '200':
+          description: Comments retrieved successfully
