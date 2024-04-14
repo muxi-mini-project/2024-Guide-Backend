@@ -1,0 +1,72 @@
+swagger: '2.0'
+info:
+  version: "1.0.0"
+  title: "引路人"
+  description: "API"
+
+host: "150.158.114.182"
+basePath: "/"
+schemes:
+  - "http"
+
+paths:
+  /forgotpassword:
+  /forgot-password:
+    post:
+      summary: "Send verification code for password reset"
+      description: "Sends a verification code to the user's email to verify identity before resetting the password."
+      consumes:
+        - "application/x-www-form-urlencoded"
+      parameters:
+        - name: "email"
+          in: "formData"
+          required: true
+          type: "string"
+          description: "User's email to which the verification code will be sent."
+      responses:
+        200:
+          description: "Verification code sent successfully"
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+        500:
+          description: "Failed to send verification code"
+
+  /reset-password:
+    post:
+      summary: "Reset user's password"
+      description: "Allows the user to reset their password using the verification code sent to their email."
+      consumes:
+        - "application/x-www-form-urlencoded"
+      parameters:
+        - name: "email"
+          in: "formData"
+          required: true
+          type: "string"
+          description: "User's email to verify."
+        - name: "verification_code"
+          in: "formData"
+          required: true
+          type: "string"
+          description: "Verification code received by email."
+        - name: "new_password"
+          in: "formData"
+          required: true
+          type: "string"
+          description: "New password to set for the user."
+      responses:
+        200:
+          description: "Password reset successfully"
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+        400:
+          description: "Invalid verification code"
+        500:
+          description: "Failed to reset password"
+
+definitions:
+  ResponseMessage:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+        description: "A message to indicate the result of the operation."

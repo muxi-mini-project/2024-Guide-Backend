@@ -1,0 +1,60 @@
+swagger: '2.0'
+info:
+  version: "1.0.0"
+  title: "引路人"
+  description: "API"
+
+host: "150.158.114.182"
+basePath: "/"
+schemes:
+  - "http"
+
+paths:
+  /userlogin:
+  /login:
+    post:
+      summary: "Login and send verification code"
+      description: "Performs a login attempt and sends a verification code to the user's email."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "user"
+          description: "User's login information"
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        200:
+          description: "Login initiated and verification code sent"
+        400:
+          description: "Invalid request payload"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        500:
+          description: "Failed to send verification code"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+definitions:
+  User:
+    type: "object"
+    required:
+      - "email"
+      - "password"
+    properties:
+      email:
+        type: "string"
+        description: "Email address of the user"
+      password:
+        type: "string"
+        description: "User's password"
+
+  ErrorResponse:
+    type: "object"
+    properties:
+      error:
+        type: "string"
+        description: "Error message detailing the issue."

@@ -1,0 +1,91 @@
+swagger: '2.0'
+info:
+  version: "1.0.0"
+  title: "引路人"
+  description: "API"
+
+host: "150.158.114.182"
+basePath: "/"
+schemes:
+  - "http"
+
+paths:
+  /regist:
+  /register:
+    post:
+      summary: "Register new user"
+      description: "Handles new user registrations by sending a verification code to the provided email."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "user"
+          description: "User's registration information"
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        200:
+          description: "Verification code sent successfully"
+        400:
+          description: "Invalid request payload"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        500:
+          description: "Failed to send or store verification code"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /verify-code:
+    post:
+      summary: "Verify user's code"
+      description: "Verifies the code sent to the user's email during registration."
+      consumes:
+        - "application/x-www-form-urlencoded"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "formData"
+          name: "email"
+          type: "string"
+          required: true
+          description: "User's email to which the verification code was sent"
+        - in: "formData"
+          name: "verification_code"
+          type: "string"
+          required: true
+          description: "Verification code that was sent to the user's email"
+      responses:
+        201:
+          description: "User registered successfully"
+        400:
+          description: "Invalid request payload or verification code"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        500:
+          description: "Failed to retrieve or register user"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+definitions:
+  User:
+    type: "object"
+    required:
+      - "email"
+      - "password"
+    properties:
+      email:
+        type: "string"
+        description: "Email address of the user"
+      password:
+        type: "string"
+        description: "User's password"
+
+  ErrorResponse:
+    type: "object"
+    properties:
+      error:
+        type: "string"
+        description: "Error message detailing the issue."

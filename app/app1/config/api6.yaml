@@ -1,0 +1,110 @@
+swagger: '2.0'
+info:
+  version: "1.0.0"
+  title: "引路人"
+  description: "API"
+
+host: "150.158.114.182"
+basePath: "/"
+schemes:
+  - "http"
+
+paths:
+  /taam:
+  /team/create:
+    post:
+      summary: "Create a new team"
+      description: "Creates a new team with the specified details."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "team"
+          description: "Team data to create a new team"
+          required: true
+          schema:
+            $ref: '#/definitions/Team'
+      responses:
+        201:
+          description: "Team successfully created"
+          schema:
+            $ref: '#/definitions/Team'
+        400:
+          description: "Invalid request payload"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /team/join:
+    post:
+      summary: "Join a team"
+      description: "Join a team using an invitation string."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "member"
+          description: "Team member data including invitation string"
+          required: true
+          schema:
+            $ref: '#/definitions/TeamMember'
+      responses:
+        201:
+          description: "Successfully joined the team"
+          schema:
+            $ref: '#/definitions/SuccessMessage'
+        400:
+          description: "Invalid request payload or invitation type error"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+definitions:
+  Team:
+    type: "object"
+    required:
+      - "name"
+      - "invitation"
+    properties:
+      name:
+        type: "string"
+      invitation:
+        type: "string"
+
+  TeamMember:
+    type: "object"
+    required:
+      - "userID"
+      - "invitation"
+      - "position"
+    properties:
+      userID:
+        type: "integer"
+      invitation:
+        type: "string"
+      position:
+        type: "string"
+
+  ErrorResponse:
+    type: "object"
+    properties:
+      error:
+        type: "string"
+        description: "Error message explaining the nature of the error."
+
+  SuccessMessage:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+        description: "Success message confirming the action."
