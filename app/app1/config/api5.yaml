@@ -1,0 +1,125 @@
+swagger: '2.0'
+info:
+  version: "1.0.0"
+  title: "引路人"
+  description: "API"
+
+host: "150.158.114.182"
+basePath: "/"
+schemes:
+  - "http"
+
+paths:
+  /任务:
+  /tasks/create:
+    post:
+      summary: "Create a new task"
+      description: "Creates a new task with the given details."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "task"
+          description: "Task data"
+          required: true
+          schema:
+            $ref: '#/definitions/Task'
+      responses:
+        201:
+          description: "Task successfully created"
+          schema:
+            $ref: '#/definitions/Task'
+        400:
+          description: "Invalid request payload"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /tasks/{id}:
+    get:
+      summary: "Get task by ID"
+      description: "Retrieves a task by its unique ID."
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "id"
+          type: "integer"
+          required: true
+          description: "Task ID"
+      responses:
+        200:
+          description: "Task retrieved successfully"
+          schema:
+            $ref: '#/definitions/Task'
+        400:
+          description: "Invalid task ID"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        404:
+          description: "Task not found"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /tasks/mark-completed/{taskID}:
+    post:
+      summary: "Mark a task as completed"
+      description: "Marks the specified task as completed."
+      produces:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "taskID"
+          type: "integer"
+          required: true
+          description: "Task ID to mark as completed"
+      responses:
+        200:
+          description: "Task marked as completed successfully"
+          schema:
+            $ref: '#/definitions/SuccessMessage'
+        400:
+          description: "Invalid task ID"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        500:
+          description: "Failed to mark task as completed"
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+definitions:
+  Task:
+    type: "object"
+    required:
+      - "title"
+      - "description"
+      - "points"
+      - "userID"
+    properties:
+      title:
+        type: "string"
+      description:
+        type: "string"
+      points:
+        type: "integer"
+      userID:
+        type: "integer"
+
+  ErrorResponse:
+    type: "object"
+    properties:
+      error:
+        type: "string"
+        description: "Error message explaining the nature of the error."
+
+  SuccessMessage:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+        description: "Success message confirming the action."

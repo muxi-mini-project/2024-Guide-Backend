@@ -1,0 +1,115 @@
+swagger: '2.0'
+info:
+  version: "1.0.0"
+  title: "引路人"
+  description: "API"
+
+host: "150.158.114.182"
+basePath: "/"
+schemes:
+  - "http"
+
+paths:
+  /user:
+  /users/{userID}/upgrade:
+    post:
+      summary: "Upgrade a user"
+      description: "Upgrades the user's status based on the provided user ID."
+      parameters:
+        - name: "userID"
+          in: "path"
+          required: true
+          type: "integer"
+          format: "int32"
+          description: "The ID of the user to upgrade."
+      responses:
+        200:
+          description: "User successfully upgraded"
+        400:
+          description: "Invalid user ID"
+        500:
+          description: "Failed to upgrade user"
+
+  /daily-tasks:
+    get:
+      summary: "Get all daily tasks"
+      description: "Retrieves all daily tasks available."
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Task'
+        500:
+          description: "Failed to retrieve tasks"
+
+  /users/{userID}/daily-tasks:
+    get:
+      summary: "Get daily tasks by user ID"
+      description: "Retrieves daily tasks specific to the user ID provided."
+      parameters:
+        - name: "userID"
+          in: "path"
+          required: true
+          type: "integer"
+          format: "int32"
+          description: "The ID of the user."
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Task'
+        400:
+          description: "Invalid user ID"
+        500:
+          description: "Failed to retrieve tasks for user"
+
+  /users/{userID}/convert-points:
+    post:
+      summary: "Convert points to experience"
+      description: "Converts user's points to experience for the given user ID."
+      parameters:
+        - name: "userID"
+          in: "path"
+          required: true
+          type: "integer"
+          format: "int32"
+          description: "The ID of the user."
+        - in: "body"
+          name: "conversion"
+          required: true
+          schema:
+            $ref: '#/definitions/PointsToExperience'
+      responses:
+        200:
+          description: "Points successfully converted to experience"
+        400:
+          description: "Invalid request"
+        500:
+          description: "Failed to convert points"
+
+definitions:
+  Task:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      title:
+        type: "string"
+      description:
+        type: "string"
+      assignedToUserID:
+        type: "integer"
+        format: "int32"
+
+  PointsToExperience:
+    type: "object"
+    required:
+      - "points"
+    properties:
+      points:
+        type: "integer"
